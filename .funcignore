@@ -1,0 +1,10 @@
+__azurite_db*__.json
+__blobstorage__
+__pycache__
+__queuestorage__
+.git*
+.venv
+.vscode
+*local.settings.json
+test
+README.md
