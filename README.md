@@ -113,7 +113,7 @@ Azure Functionsのアプリ キーはエンドポイントの末尾に `?code=` 
 | リクエスト ||
 |-|-|
 | *メソッド* | POST |
-| *エンドポイント* | https://{{ENDPOINT}}/api/ChatCompletion |
+| *エンドポイント* | https://{{ENDPOINT}}/api/CogSearch |
 | *ヘッダ* | Content-Type: application/json |
 
 | *ボディ* ||||
