@@ -34,6 +34,7 @@ Cognitive Searchを利用するなら → https://github.com/Azure-Samples/azure
 
 6. `git clone`
 7. `./embedding_csv` に埋め込み済みのFAQファイルを配置
+   - **desktop.iniが入らないように注意**
 8. VSCodeの `Azure: WORKSPACE` からAzureにデプロイ
 
 ![image](https://user-images.githubusercontent.com/110897881/232027696-ba6b54ad-9912-4a25-9510-92117cb158ca.png)
