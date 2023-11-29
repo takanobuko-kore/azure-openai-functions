@@ -100,7 +100,7 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
         files = glob.glob("embedding_csv/*.*")
         for file_ in files:
             df_ = pd.read_csv(file_, encoding="utf8")
-            df_["filename"] = file_.removeprefix("embedding_csv\\")
+            df_["filename"] = file_.removeprefix("embedding_csv/")
             list_.append(df_)
         df = pd.concat(list_)
 
