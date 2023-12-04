@@ -17,15 +17,6 @@ CogSearch = func.Blueprint()
 def main(req: func.HttpRequest) -> func.HttpResponse:
     logging.info('Python HTTP trigger function "CogSearch" processed a request.')
 
-    step = req.params.get("step")
-    if not step:
-        try:
-            req_body = req.get_json()
-        except ValueError:
-            pass
-        else:
-            step = req_body.get("step")
-
     q = req.params.get("question")
     if not q:
         try:
@@ -35,142 +26,109 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
         else:
             q = req_body.get("question")
 
-    if step == 1:
-        client = AzureOpenAI()
+    top = req.params.get("top")
+    if not top:
+        try:
+            req_body = req.get_json()
+        except ValueError:
+            pass
+        else:
+            top = req_body.get("top")
+    if top == None:
+        top = 3
 
-        # If retrieval mode includes vectors, compute an embedding for the query
-        embedding = client.embeddings.create(
-            model=myopenAI.EMBEDDING_MODEL_DEPLOYMENT_NAME, input=q
-        )
+    model = req.params.get("model")
+    if not model:
+        try:
+            req_body = req.get_json()
+        except ValueError:
+            pass
+        else:
+            model = req_body.get("model")
 
-        return func.HttpResponse(
-            json.dumps({"embedding": embedding.data[0].embedding}), status_code=200
-        )
-    elif step == 2:
-        embedding = req.params.get("embedding")
-        if not embedding:
-            try:
-                req_body = req.get_json()
-            except ValueError:
-                pass
-            else:
-                embedding = req_body.get("embedding")
+    client = AzureOpenAI()
 
-        top = req.params.get("top")
-        if not top:
-            try:
-                req_body = req.get_json()
-            except ValueError:
-                pass
-            else:
-                top = req_body.get("top")
-        if top == None:
-            top = 3
+    # If retrieval mode includes vectors, compute an embedding for the query
+    embedding = client.embeddings.create(
+        model=myopenAI.EMBEDDING_MODEL_DEPLOYMENT_NAME, input=q
+    )
 
-        vectors: list[VectorQuery] = []
-        vectors.append(RawVectorQuery(vector=embedding, k=50, fields="embedding"))
+    vectors: list[VectorQuery] = []
+    vectors.append(
+        RawVectorQuery(vector=embedding.data[0].embedding, k=50, fields="embedding")
+    )
 
-        # Only keep the text query if the retrieval mode uses text, otherwise drop it
-        search_client = SearchClient(
-            endpoint=myopenAI.COGNITIVE_SEARCH_ENDPOINT,
-            index_name=myopenAI.COGNITIVE_SEARCH_INDEX,
-            credential=AzureKeyCredential(myopenAI.COGNITIVE_SEARCH_API_KEY),
-        )
+    # Only keep the text query if the retrieval mode uses text, otherwise drop it
+    search_client = SearchClient(
+        endpoint=myopenAI.COGNITIVE_SEARCH_ENDPOINT,
+        index_name=myopenAI.COGNITIVE_SEARCH_INDEX,
+        credential=AzureKeyCredential(myopenAI.COGNITIVE_SEARCH_API_KEY),
+    )
 
-        r = search_client.search(
-            q,
-            query_type=QueryType.SEMANTIC,
-            query_language="ja-JP",
-            query_speller="none",
-            semantic_configuration_name="default",
-            top=top,
-            vector_queries=vectors,
-        )
-        results = [
-            doc["sourcepage"]
-            + ": "
-            + doc["content"].replace("\n", " ").replace("\r", " ")
-            for doc in r
-        ]
+    r = search_client.search(
+        q,
+        query_type=QueryType.SEMANTIC,
+        query_language="ja-JP",
+        query_speller="none",
+        semantic_configuration_name="default",
+        top=top,
+        vector_queries=vectors,
+    )
+    results = [
+        doc["sourcepage"] + ": " + doc["content"].replace("\n", " ").replace("\r", " ")
+        for doc in r
+    ]
 
-        return func.HttpResponse(
-            json.dumps(
-                {
-                    "results": results,
-                },
-                ensure_ascii=False,
-            ),
-            status_code=200,
-        )
-    elif step == 3:
-        results = req.params.get("results")
-        if not results:
-            try:
-                req_body = req.get_json()
-            except ValueError:
-                pass
-            else:
-                results = req_body.get("results")
+    content = "\n".join(results)
 
-        model = req.params.get("model")
-        if not model:
-            try:
-                req_body = req.get_json()
-            except ValueError:
-                pass
-            else:
-                model = req_body.get("model")
-
-        content = "\n".join(results)
-
-        messages = [
-            {
-                "role": "system",
-                "content": """You are an intelligent assistant helping Contoso Inc employees with their healthcare plan questions and employee handbook questions.
+    messages = [
+        {
+            "role": "system",
+            "content": """You are an intelligent assistant helping Contoso Inc employees with their healthcare plan questions and employee handbook questions.
 Use 'you' to refer to the individual asking the questions even if they ask with 'I'.
 Answer the following question using only the data provided in the sources below.
 For tabular information return it as an html table. Do not return markdown format.
 Each source has a name followed by colon and the actual information, always include the source name for each fact you use in the response.
 If you cannot answer using the sources below, say you don't know. Use below example to answer""",
-            }
-        ]
+        }
+    ]
 
-        # Add shots/samples. This helps model to mimic response and make sure they match rules laid out in system message.
-        messages.append(
-            {
-                "role": "user",
-                "content": """'What is the deductible for the employee plan for a visit to Overlake in Bellevue?'
+    # Add shots/samples. This helps model to mimic response and make sure they match rules laid out in system message.
+    messages.append(
+        {
+            "role": "user",
+            "content": """'What is the deductible for the employee plan for a visit to Overlake in Bellevue?'
 
 Sources:
 info1.txt: deductibles depend on whether you are in-network or out-of-network. In-network deductibles are $500 for employee and $1000 for family. Out-of-network deductibles are $1000 for employee and $2000 for family.
 info2.pdf: Overlake is in-network for the employee plan.
 info3.pdf: Overlake is the name of the area that includes a park and ride near Bellevue.
 info4.pdf: In-network institutions include Overlake, Swedish and others in the region""",
-            }
-        )
-        messages.append(
+        }
+    )
+    messages.append(
+        {
+            "role": "assistant",
+            "content": "In-network deductibles are $500 for employee and $1000 for family [info1.txt] and Overlake is in-network for the employee plan [info2.pdf][info4.pdf].",
+        }
+    )
+
+    # add user question
+    user_content = q + "\n" + f"Sources:\n {content}"
+    messages.append({"role": "user", "content": user_content})
+
+    client = AzureOpenAI()
+    chat_completion = client.chat.completions.create(model=model, messages=messages)
+
+    return func.HttpResponse(
+        json.dumps(
             {
-                "role": "assistant",
-                "content": "In-network deductibles are $500 for employee and $1000 for family [info1.txt] and Overlake is in-network for the employee plan [info2.pdf][info4.pdf].",
-            }
-        )
-
-        # add user question
-        user_content = q + "\n" + f"Sources:\n {content}"
-        messages.append({"role": "user", "content": user_content})
-
-        client = AzureOpenAI()
-        chat_completion = client.chat.completions.create(model=model, messages=messages)
-
-        return func.HttpResponse(
-            json.dumps(
-                {
-                    "answer": chat_completion.choices[0].message.content,
-                    "data_points": results,
-                    "thoughts": f"Question:<br>{q}<br><br>Prompt:<br>"
-                    + "\n\n".join([str(message) for message in messages]),
-                },
-                ensure_ascii=False,
-            ),
-            status_code=200,
-        )
+                "answer": chat_completion.choices[0].message.content,
+                "data_points": results,
+                "thoughts": f"Question:<br>{q}<br><br>Prompt:<br>"
+                + "\n\n".join([str(message) for message in messages]),
+            },
+            ensure_ascii=False,
+        ),
+        status_code=200,
+    )

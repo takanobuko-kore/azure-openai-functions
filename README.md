@@ -117,33 +117,16 @@ Azure Functionsのアプリ キーはエンドポイントの末尾に `?code=` 
 | *エンドポイント* | https://{{ENDPOINT}}/api/CogSearch |
 | *ヘッダ* | Content-Type: application/json |
 
-| *ボディ(共通)* ||||
+| *ボディ* ||||
 |-|-|-|-|
-| step | 必須 | Number<br>(1～3) | 検索ステップ |
 | question | 必須 | String | 質問クエリ |
-
-| *ボディ(step2)* ||||
-|-|-|-|-|
-| embedding | 必須 | List[Float] | step1で生成されたembedding |
 | top | オプション | String | 取得する検索結果の数<br>(デフォルト: 3) |
-
-| *ボディ(step3)* ||||
-|-|-|-|-|
-| results | 必須 | String | step2で検索された結果 |
 | model | 必須 | String | GPTモデルデプロイ名 |
 
 #### step1
 **question** からCognitive Searchでの検索用クエリを生成する  
-返す値は下記の通り
-- embedding: 検索用クエリのembedding
-
-#### step2
-**question** と step1で生成されたembeddingでCognitive Search検索  
-返す値は下記の通り
-- results: 検索結果
-
-#### step3
-step2の検索結果を要約してJSONで返す  
+**question** と 生成されたembeddingでCognitive Search検索  
+検索結果を要約してJSONで返す  
 返す値は下記の通り
 - answer: 要約文 
 - data_points: Cognitive Searchでの検索結果
