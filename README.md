@@ -93,7 +93,7 @@ Azure Functionsのアプリ キーはエンドポイントの末尾に `?code=` 
 | question | 必須 | String | 質問クエリ |
 | filename | オプション | String, Array, "all" | 検索対象ファイル名<br>(デフォルト: all) |
 | threshold | オプション | Number<br>(0～1) | コサイン類似度の閾値<br>(デフォルト: 0.8) |
-| top | オプション | Number<br>(1～) | 検索結果上位から表示する数<br>(デフォルト: 3) |
+| top | オプション | Number<br>(1～) | 取得する検索結果の数<br>(デフォルト: 3) |
 | orient | オプション | "split", "records", "index", "columns", "values", "table"<br>[参考](https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.to_json.html) | 応答ボディのJSONフォーマット<br>(デフォルト: records) |
 
 質問クエリのEmbeddingを計算後、FAQ内の各Embeddingとコサイン類似度を取る  
@@ -117,19 +117,45 @@ Azure Functionsのアプリ キーはエンドポイントの末尾に `?code=` 
 | *エンドポイント* | https://{{ENDPOINT}}/api/CogSearch |
 | *ヘッダ* | Content-Type: application/json |
 
-| *ボディ* ||||
+| *ボディ(共通)* ||||
 |-|-|-|-|
-| model | 必須 | String | GPTモデルデプロイ名 |
+| step | 必須 | Number<br>(1～3) | 検索ステップ |
 | question | 必須 | String | 質問クエリ |
 
-**model** に対し **question** からCognitive Searchでの検索用クエリを生成する  
-Cognitive Searchで検索後、検索結果上位3件のデータを要約してJSONで返す  
-返す値は下記の通り
-- query: Cognitive Searchでの検索用クエリ
-- data_points: Cognitive Searchでの検索結果
-- answer: 要約文
+| *ボディ(step2)* ||||
+|-|-|-|-|
+| embedding | 必須 | List[Float] | step1で生成されたembedding |
+| top | オプション | String | 取得する検索結果の数<br>(デフォルト: 3) |
 
-[参考](https://github.com/Azure-Samples/azure-search-openai-demo/blob/6ac7c909c02d760bafd5e5e838fa8c2a46dd4aaf/app/backend/approaches/chatreadretrieveread.py)
+| *ボディ(step3)* ||||
+|-|-|-|-|
+| results | 必須 | String | step2で検索された結果 |
+| model | 必須 | String | GPTモデルデプロイ名 |
+
+#### step1
+**question** からCognitive Searchでの検索用クエリを生成する  
+返す値は下記の通り
+- embedding: 検索用クエリのembedding
+
+#### step2
+**question** と step1で生成されたembeddingでCognitive Search検索  
+返す値は下記の通り
+- results: 検索結果
+
+#### step3
+step2の検索結果を要約してJSONで返す  
+返す値は下記の通り
+- answer: 要約文 
+- data_points: Cognitive Searchでの検索結果
+- thoughts: Cognitive Searchでの検索用クエリ
+
+[参考](https://github.com/Azure-Samples/azure-search-openai-demo/blob/main/app/backend/approaches/retrievethenread.py)
+- retrieval_mode: "hybrid"
+- semantic_ranker: true
+- query_type=QueryType.SEMANTIC,
+- query_language="ja-JP",
+- query_speller="none",
+- semantic_configuration_name="default"
 
 ---
 
