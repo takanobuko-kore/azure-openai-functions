@@ -31,6 +31,8 @@ Cognitive Searchを利用するなら → https://github.com/Azure-Samples/azure
     | COGNITIVE_SEARCH_API_KEY | [検索サービス] - [キー] - [プライマリ管理者キー] |
     | COGNITIVE_SEARCH_ENDPOINT | [検索サービス] - [概要] - [URL] |
     | COGNITIVE_SEARCH_INDEX  | [検索サービス] - [インデックス] - [名前] |
+    | AZURE_STORAGE_ACCOUNT | [ストレージ アカウント] - [名前] |
+    | AZURE_STORAGE_CONTAINER  | [ストレージ アカウント] - [コンテナー] - [名前] |
 
 6. `git clone`
 7. `./embedding_csv` に埋め込み済みのFAQファイルを配置
@@ -123,7 +125,6 @@ Azure Functionsのアプリ キーはエンドポイントの末尾に `?code=` 
 | top | オプション | String | 取得する検索結果の数<br>(デフォルト: 3) |
 | model | 必須 | String | GPTモデルデプロイ名 |
 
-#### step1
 **question** からCognitive Searchでの検索用クエリを生成する  
 **question** と 生成されたembeddingでCognitive Search検索  
 検索結果を要約してJSONで返す  
@@ -139,6 +140,18 @@ Azure Functionsのアプリ キーはエンドポイントの末尾に `?code=` 
 - query_language="ja-JP",
 - query_speller="none",
 - semantic_configuration_name="default"
+
+| リクエスト ||
+|-|-|
+| *メソッド* | GET |
+| *エンドポイント* | https://{{ENDPOINT}}/api/CogSearch/content/{{filename}} |
+| *ヘッダ* | Content-Type: application/json |
+
+| *クエリ* ||||
+|-|-|-|-|
+| filename | 必須 | String | ファイル名 |
+
+**AZURE_STORAGE_CONTAINER**内の該当ファイルをダウンロード
 
 ---
 

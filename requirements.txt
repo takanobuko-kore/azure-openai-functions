@@ -7,5 +7,10 @@ openai
 pandas
 tiktoken
 
+# CogSearch
 azure-core
 azure-search-documents==11.4.0b11
+
+# CogSearchContent
+azure-identity
+azure-storage-blob

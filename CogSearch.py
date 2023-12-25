@@ -1,15 +1,60 @@
+import io
 import json
 import logging
+import mimetypes
 
 import azure.functions as func
 from azure.core.credentials import AzureKeyCredential
+from azure.core.exceptions import ResourceNotFoundError
+from azure.identity import DefaultAzureCredential
 from azure.search.documents import SearchClient
 from azure.search.documents.models import QueryType, RawVectorQuery, VectorQuery
+from azure.storage.blob import BlobServiceClient
 from openai import AzureOpenAI
 
 import libs.loadOpenAI as myopenAI
 
 CogSearch = func.Blueprint()
+
+
+@CogSearch.function_name(name="CogSearchContent")
+@CogSearch.route(route="CogSearch/content/{filename}")
+def main(req: func.HttpRequest) -> func.HttpResponse:
+    logging.info('Python HTTP trigger function "CogSearchContent" processed a request.')
+    path = req.route_params.get("filename")
+
+    # Remove page number from path, filename-1.txt -> filename.txt
+    if path.find("#page=") > 0:
+        path_parts = path.rsplit("#page=", 1)
+        path = path_parts[0]
+
+    azure_credential = DefaultAzureCredential(
+        exclude_shared_token_cache_credential=True
+    )
+
+    blob_client = BlobServiceClient(
+        account_url=f"https://{myopenAI.AZURE_STORAGE_ACCOUNT}.blob.core.windows.net",
+        credential=azure_credential,
+    )
+    blob_container_client = blob_client.get_container_client(
+        myopenAI.AZURE_STORAGE_CONTAINER
+    )
+
+    try:
+        blob = blob_container_client.get_blob_client(path).download_blob()
+    except ResourceNotFoundError:
+        logging.exception("Path not found: %s", path)
+        return func.HttpResponse(status_code=404)
+    if not blob.properties or not blob.properties.has_key("content_settings"):
+        return func.HttpResponse(status_code=404)
+    mime_type = blob.properties["content_settings"]["content_type"]
+    if mime_type == "application/octet-stream":
+        mime_type = mimetypes.guess_type(path)[0] or "application/octet-stream"
+    blob_file = io.BytesIO()
+    blob.readinto(blob_file)
+    blob_file.seek(0)
+
+    return func.HttpResponse(blob_file.read(), status_code=200, mimetype=mime_type)
 
 
 @CogSearch.function_name(name="CogSearch")
