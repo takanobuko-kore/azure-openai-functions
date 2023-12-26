@@ -18,7 +18,10 @@ CogSearch = func.Blueprint()
 
 
 @CogSearch.function_name(name="CogSearchContent")
-@CogSearch.route(route="CogSearch/content/{filename}")
+@CogSearch.route(
+    route="CogSearch/content/{filename}",
+    auth_level=func.AuthLevel.ANONYMOUS,
+)
 def main(req: func.HttpRequest) -> func.HttpResponse:
     logging.info('Python HTTP trigger function "CogSearchContent" processed a request.')
     path = req.route_params.get("filename")
@@ -28,13 +31,9 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
         path_parts = path.rsplit("#page=", 1)
         path = path_parts[0]
 
-    azure_credential = DefaultAzureCredential(
-        exclude_shared_token_cache_credential=True
-    )
-
     blob_client = BlobServiceClient(
         account_url=f"https://{myopenAI.AZURE_STORAGE_ACCOUNT}.blob.core.windows.net",
-        credential=azure_credential,
+        credential=DefaultAzureCredential(exclude_shared_token_cache_credential=True),
     )
     blob_container_client = blob_client.get_container_client(
         myopenAI.AZURE_STORAGE_CONTAINER
