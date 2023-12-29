@@ -6,7 +6,7 @@ import mimetypes
 import azure.functions as func
 from azure.core.credentials import AzureKeyCredential
 from azure.core.exceptions import ResourceNotFoundError
-from azure.identity import DefaultAzureCredential
+from azure.identity import DefaultAzureCredential, get_bearer_token_provider
 from azure.search.documents import SearchClient
 from azure.search.documents.models import QueryType, RawVectorQuery, VectorQuery
 from azure.storage.blob import BlobServiceClient
@@ -90,7 +90,11 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
         else:
             model = req_body.get("model")
 
-    client = AzureOpenAI()
+    client = AzureOpenAI(
+        azure_ad_token_provider=get_bearer_token_provider(
+            DefaultAzureCredential(), "https://cognitiveservices.azure.com/.default"
+        )
+    )
 
     # If retrieval mode includes vectors, compute an embedding for the query
     embedding = client.embeddings.create(
@@ -161,7 +165,6 @@ info4.pdf: In-network institutions include Overlake, Swedish and others in the r
     user_content = q + "\n" + f"Sources:\n {content}"
     messages.append({"role": "user", "content": user_content})
 
-    client = AzureOpenAI()
     chat_completion = client.chat.completions.create(model=model, messages=messages)
 
     return func.HttpResponse(

@@ -4,6 +4,7 @@ import logging
 import azure.functions as func
 import numpy as np
 import pandas as pd
+from azure.identity import DefaultAzureCredential, get_bearer_token_provider
 from openai import AzureOpenAI
 
 import libs.loadOpenAI as myopenAI
@@ -69,7 +70,11 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
     if orient == None:
         orient = "records"
 
-    client = AzureOpenAI()
+    client = AzureOpenAI(
+        azure_ad_token_provider=get_bearer_token_provider(
+            DefaultAzureCredential(), "https://cognitiveservices.azure.com/.default"
+        )
+    )
 
     embedding = (
         client.embeddings.create(

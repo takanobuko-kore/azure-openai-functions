@@ -13,42 +13,53 @@ Kore.ai XO Platform のナレッジ AI でも V10.1 から同様の機能が標�
   - 拡張機能: Azure Functions
 
 ### 初期構築手順
-1. Azure OpenAI リソースをデプロイ
+1. Azure OpenAI をデプロイ
 2. Azure OpenAI のモデルをデプロイ
-    - 2023/11 時点では `text-embedding-ada-002` が最適
 3. VSCode の `Azure: RESOURCES` から Azure にログイン
 4. 関数アプリを作成
 5. [設定] - [構成] - [アプリケーション設定] に下記を追加
 
     | App Setting Name | Value |
     | --- | --- |
-    | AZURE_OPENAI_API_KEY | [Azure OpenAI] - [キーとエンドポイント] - [キー1/2どちらか] |
     | AZURE_OPENAI_ENDPOINT | [Azure OpenAI] - [キーとエンドポイント] - [エンドポイント] |
     | OPENAI_API_VERSION | "2023-05-15"<br>cf. https://github.com/Azure/azure-rest-api-specs/tree/main/specification/cognitiveservices/data-plane/AzureOpenAI/inference/stable |
     | AZURE_OPENAI_EMB_DEPLOYMENT | [Azure OpenAI] - [モデル デプロイ] - [モデル デプロイ名] |
 
-6. `git clone`
-7. `./embedding_csv` に埋め込み済みのFAQファイルを配置
-   - **desktop.ini が入らないように注意**
-8. VSCode の `Azure: WORKSPACE` から Azure にデプロイ
+6. [設定] - [ID] - [システム割り当て済み] から [状態] を「オン」にし、保存
+7. 作成した Azure OpenAI の [アクセス制御 (IAM)] - [追加] - [ロールの割り当ての追加]
+    - ロール: Cognitive Services OpenAI User
+    - メンバー
+      - アクセスの割り当て先: マネージド ID
+      - メンバー
+        - サブスクリプション: (Azure OpenAI をデプロイしたサブスクリプション)
+        - マネージド ID: 関数アプリ
+        - メンバー: (作成した関数アプリを選択)
+8. `git clone`
+9.  `./embedding_csv` に埋め込み済みのFAQファイルを配置
+    - **desktop.ini が入らないように注意**
+10. VSCode の `Azure: WORKSPACE` から Azure にデプロイ
 
 ![image](https://user-images.githubusercontent.com/110897881/232027696-ba6b54ad-9912-4a25-9510-92117cb158ca.png)
 
 ### 検索サービスを利用する場合
 1. 検索サービスと関連リソースをデプロイ
     - [1つのリソースで複数テナント用にデータソースを分けて構築する方法](https://github.com/takanobuko-kore/azure-search-openai-demo/blob/main/docs/multitenant.md)
-2. 作成した関数アプリの [設定] - [ID] - [システム割り当て済み] から [状態] を「オン」にし、保存
-3. [Azure ロールの割り当て] - [ロールの割り当ての追加 (プレビュー)]
-    - CogSearch
-      - スコープ: リソース グループ
-      - サブスクリプション: (検索サービス関連をデプロイしたサブスクリプション)
-      - リソース グループ: (検索サービスをデプロイしたリソース グループ)
-      - 役割: 検索インデックス データ閲覧者
-    - CogSearchContent
-      - スコープ: ストレージ
-      - サブスクリプション: (検索サービス関連をデプロイしたサブスクリプション)
-      - リソース: (検索サービス関連をデプロイした際のストレージ アカウント)
-      - 役割: ストレージ BLOB データ閲覧者
+2. 作成した検索サービスの [アクセス制御 (IAM)] - [追加] - [ロールの割り当ての追加]
+      - ロール: 検索インデックス データ閲覧者
+      - メンバー
+        - アクセスの割り当て先: マネージド ID
+        - メンバー
+          - サブスクリプション: (Azure OpenAI をデプロイしたサブスクリプション)
+          - マネージド ID: 関数アプリ
+          - メンバー: (作成した関数アプリを選択)
+3. 作成したストレージ アカウントの [アクセス制御 (IAM)] - [追加] - [ロールの割り当ての追加]
+      - ロール: ストレージ BLOB データ閲覧者
+      - メンバー
+        - アクセスの割り当て先: マネージド ID
+        - メンバー
+          - サブスクリプション: (Azure OpenAI をデプロイしたサブスクリプション)
+          - マネージド ID: 関数アプリ
+          - メンバー: (作成した関数アプリを選択)
 4. [設定] - [構成] - [アプリケーション設定] に下記を追加
 
     | App Setting Name | Value |

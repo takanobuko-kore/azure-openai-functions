@@ -1,6 +1,7 @@
 import logging
 
 import azure.functions as func
+from azure.identity import DefaultAzureCredential, get_bearer_token_provider
 from openai import AzureOpenAI
 
 ChatCompletion = func.Blueprint()
@@ -29,7 +30,11 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
         else:
             messages = req_body.get("messages")
 
-    client = AzureOpenAI()
+    client = AzureOpenAI(
+        azure_ad_token_provider=get_bearer_token_provider(
+            DefaultAzureCredential(), "https://cognitiveservices.azure.com/.default"
+        )
+    )
 
     response = client.chat.completions.create(model=model, messages=messages)
     return func.HttpResponse(response.choices[0].message.content, status_code=200)

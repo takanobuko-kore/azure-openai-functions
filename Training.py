@@ -4,6 +4,7 @@ import re
 import azure.functions as func
 import pandas as pd
 import tiktoken
+from azure.identity import DefaultAzureCredential, get_bearer_token_provider
 from openai import AzureOpenAI
 
 import libs.loadOpenAI as myopenAI
@@ -71,7 +72,11 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
     df["n_tokens"] = df[target].apply(lambda x: len(tokenizer.encode(x)))
     df = df[df.n_tokens < 8192]
 
-    client = AzureOpenAI()
+    client = AzureOpenAI(
+        azure_ad_token_provider=get_bearer_token_provider(
+            DefaultAzureCredential(), "https://cognitiveservices.azure.com/.default"
+        )
+    )
 
     # 埋め込み(embedding)
     df["embedding"] = df[target].apply(
