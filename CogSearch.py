@@ -4,7 +4,6 @@ import logging
 import mimetypes
 
 import azure.functions as func
-from azure.core.credentials import AzureKeyCredential
 from azure.core.exceptions import ResourceNotFoundError
 from azure.identity import DefaultAzureCredential, get_bearer_token_provider
 from azure.search.documents import SearchClient
