@@ -13,8 +13,6 @@ Kore.ai PlatformのナレッジAIでもV10.1から同様の機能が標準搭載
   - 拡張機能: Azure Functions
 
 ### 初期構築手順
-Cognitive Searchを利用するなら → https://github.com/Azure-Samples/azure-search-openai-demo
-
 1. Azure OpenAIリソースをデプロイ
 2. Azure OpenAIのモデルをデプロイ
     - 2023/11時点では `text-embedding-ada-002` が最適
@@ -28,11 +26,6 @@ Cognitive Searchを利用するなら → https://github.com/Azure-Samples/azure
     | AZURE_OPENAI_ENDPOINT | [Azure OpenAI] - [キーとエンドポイント] - [エンドポイント] |
     | OPENAI_API_VERSION | "2023-05-15"<br>cf. https://github.com/Azure/azure-rest-api-specs/tree/main/specification/cognitiveservices/data-plane/AzureOpenAI/inference/stable |
     | EMBEDDING_MODEL_DEPLOYMENT_NAME | [Azure OpenAI] - [モデル デプロイ] - [モデル デプロイ名] |
-    | COGNITIVE_SEARCH_API_KEY | [検索サービス] - [キー] - [プライマリ管理者キー] |
-    | COGNITIVE_SEARCH_ENDPOINT | [検索サービス] - [概要] - [URL] |
-    | COGNITIVE_SEARCH_INDEX  | [検索サービス] - [インデックス] - [名前] |
-    | AZURE_STORAGE_ACCOUNT | [ストレージ アカウント] - [名前] |
-    | AZURE_STORAGE_CONTAINER  | [ストレージ アカウント] - [コンテナー] - [名前] |
 
 6. `git clone`
 7. `./embedding_csv` に埋め込み済みのFAQファイルを配置
@@ -40,6 +33,25 @@ Cognitive Searchを利用するなら → https://github.com/Azure-Samples/azure
 8. VSCodeの `Azure: WORKSPACE` からAzureにデプロイ
 
 ![image](https://user-images.githubusercontent.com/110897881/232027696-ba6b54ad-9912-4a25-9510-92117cb158ca.png)
+
+### 検索サービスを利用する場合
+1. 検索サービスと関連リソースをデプロイ
+    - [1つのリソースで複数テナント用にデータソースを分けて構築する方法](https://github.com/takanobuko-kore/azure-search-openai-demo/blob/main/docs/multitenant.md)
+2. 作成した関数アプリの [設定] - [ID] - [システム割り当て済み] から [状態] を「オン」にし、保存
+3. [Azure ロールの割り当て] - [ロールの割り当ての追加 (プレビュー)]
+    - スコープ: ストレージ
+    - サブスクリプション: (検索サービス関連をデプロイしたサブスクリプション)
+    - リソース: (検索サービス関連をデプロイした際のストレージ アカウント名)
+    - 役割: ストレージ BLOB データ閲覧者
+4. [設定] - [構成] - [アプリケーション設定] に下記を追加
+
+    | App Setting Name | Value |
+    | --- | --- |
+    | COGNITIVE_SEARCH_API_KEY | [検索サービス] - [キー] - [プライマリ管理者キー] |
+    | COGNITIVE_SEARCH_ENDPOINT | [検索サービス] - [概要] - [URL] |
+    | COGNITIVE_SEARCH_INDEX  | [検索サービス] - [インデックス] - [名前] |
+    | AZURE_STORAGE_ACCOUNT | [ストレージ アカウント] - [名前] |
+    | AZURE_STORAGE_CONTAINER  | [ストレージ アカウント] - [コンテナー] - [名前] |
 
 ## ローカル環境での実行
 
