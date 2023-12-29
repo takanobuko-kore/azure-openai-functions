@@ -76,7 +76,7 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
     # 埋め込み(embedding)
     df["embedding"] = df[target].apply(
         lambda x: client.embeddings.create(
-            input=x, model=myopenAI.EMBEDDING_MODEL_DEPLOYMENT_NAME
+            input=x, model=myopenAI.AZURE_OPENAI_EMB_DEPLOYMENT
         )
         .data[0]
         .embedding

@@ -25,7 +25,7 @@ Kore.ai XO Platform のナレッジ AI でも V10.1 から同様の機能が標�
     | AZURE_OPENAI_API_KEY | [Azure OpenAI] - [キーとエンドポイント] - [キー1/2どちらか] |
     | AZURE_OPENAI_ENDPOINT | [Azure OpenAI] - [キーとエンドポイント] - [エンドポイント] |
     | OPENAI_API_VERSION | "2023-05-15"<br>cf. https://github.com/Azure/azure-rest-api-specs/tree/main/specification/cognitiveservices/data-plane/AzureOpenAI/inference/stable |
-    | EMBEDDING_MODEL_DEPLOYMENT_NAME | [Azure OpenAI] - [モデル デプロイ] - [モデル デプロイ名] |
+    | AZURE_OPENAI_EMB_DEPLOYMENT | [Azure OpenAI] - [モデル デプロイ] - [モデル デプロイ名] |
 
 6. `git clone`
 7. `./embedding_csv` に埋め込み済みのFAQファイルを配置
@@ -53,8 +53,8 @@ Kore.ai XO Platform のナレッジ AI でも V10.1 から同様の機能が標�
 
     | App Setting Name | Value |
     | --- | --- |
-    | COGNITIVE_SEARCH_ENDPOINT | [検索サービス] - [概要] - [URL] |
-    | COGNITIVE_SEARCH_INDEX  | [検索サービス] - [インデックス] - [名前] |
+    | AZURE_SEARCH_SERVICE | [検索サービス] - [名前] |
+    | AZURE_SEARCH_INDEX  | [検索サービス] - [インデックス] - [名前] |
     | AZURE_STORAGE_ACCOUNT | [ストレージ アカウント] - [名前] |
     | AZURE_STORAGE_CONTAINER  | [ストレージ アカウント] - [コンテナー] - [名前] |
 

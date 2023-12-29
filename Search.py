@@ -73,7 +73,7 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
 
     embedding = (
         client.embeddings.create(
-            input=question, model=myopenAI.EMBEDDING_MODEL_DEPLOYMENT_NAME
+            input=question, model=myopenAI.AZURE_OPENAI_EMB_DEPLOYMENT
         )
         .data[0]
         .embedding

@@ -94,7 +94,7 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
 
     # If retrieval mode includes vectors, compute an embedding for the query
     embedding = client.embeddings.create(
-        model=myopenAI.EMBEDDING_MODEL_DEPLOYMENT_NAME, input=q
+        model=myopenAI.AZURE_OPENAI_EMB_DEPLOYMENT, input=q
     )
 
     vectors: list[VectorQuery] = []
@@ -104,8 +104,8 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
 
     # Only keep the text query if the retrieval mode uses text, otherwise drop it
     search_client = SearchClient(
-        endpoint=myopenAI.COGNITIVE_SEARCH_ENDPOINT,
-        index_name=myopenAI.COGNITIVE_SEARCH_INDEX,
+        endpoint=f"https://{myopenAI.AZURE_SEARCH_SERVICE}.search.windows.net",
+        index_name=myopenAI.AZURE_SEARCH_INDEX,
         credential=DefaultAzureCredential(exclude_shared_token_cache_credential=True),
     )
 
