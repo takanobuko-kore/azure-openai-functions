@@ -106,7 +106,7 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
     search_client = SearchClient(
         endpoint=myopenAI.COGNITIVE_SEARCH_ENDPOINT,
         index_name=myopenAI.COGNITIVE_SEARCH_INDEX,
-        credential=AzureKeyCredential(myopenAI.COGNITIVE_SEARCH_API_KEY),
+        credential=DefaultAzureCredential(exclude_shared_token_cache_credential=True),
     )
 
     r = search_client.search(
