@@ -156,7 +156,7 @@ info4.pdf: In-network institutions include Overlake, Swedish and others in the r
     messages.append(
         {
             "role": "assistant",
-            "content": "In-network deductibles are $500 for employee and $1000 for family [[info1.txt]] and Overlake is in-network for the employee plan [[info2.pdf]][[info4.pdf]].",
+            "content": "In-network deductibles are $500 for employee and $1000 for family (info1.txt) and Overlake is in-network for the employee plan (info2.pdf)(info4.pdf).",
         }
     )
 
