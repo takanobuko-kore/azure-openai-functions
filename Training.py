@@ -65,12 +65,13 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
         return s
 
     # 質問文を正規化
-    df[target] = df[target].apply(lambda x: normalize_text(x))
+    df["target"] = df[target].apply(lambda x: normalize_text(x))
 
     # 質問文をトークン制限(8192トークン)
     tokenizer = tiktoken.get_encoding("cl100k_base")
-    df["n_tokens"] = df[target].apply(lambda x: len(tokenizer.encode(x)))
+    df["n_tokens"] = df["target"].apply(lambda x: len(tokenizer.encode(x)))
     df = df[df.n_tokens < 8192]
+    df = df.drop("n_tokens", axis=1)
 
     client = AzureOpenAI(
         azure_ad_token_provider=get_bearer_token_provider(
@@ -79,13 +80,14 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
     )
 
     # 埋め込み(embedding)
-    df["embedding"] = df[target].apply(
+    df["embedding"] = df["target"].apply(
         lambda x: client.embeddings.create(
             input=x, model=myopenAI.AZURE_OPENAI_EMB_DEPLOYMENT
         )
         .data[0]
         .embedding
     )
+    df = df.drop("target", axis=1)
 
     # CSVファイル書き出し
     df.to_csv("embedding_csv/" + filename, encoding="utf8")

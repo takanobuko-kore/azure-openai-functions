@@ -84,6 +84,7 @@ Kore.ai XO Platform のナレッジ AI でも V10.1 から同様の機能が標�
 1. `./csv` に FAQ ファイルを配置
     - ファイル形式: csv
     - エンコード: `UTF-8`
+    - 予約ヘッダー: `target`, `n_tokens`, `embedding`, `url`
 2. API 実行
     | リクエスト ||
     |-|-|
@@ -97,7 +98,7 @@ Kore.ai XO Platform のナレッジ AI でも V10.1 から同様の機能が標�
     | target | 必須 | String | 埋め込み対象項目 |
     | url | オプション | String | ファイル URL |
 
-FAQ ファイルの **target** 列に対して各行に `[n_tokens](埋め込み対象項目のトークン数)`, `[embedding](埋め込みベクトル)` を追加する   
+FAQ ファイルの **target** 列に対して、8192トークン以下であれば各行に `[embedding](埋め込みベクトル)` を追加する   
 埋め込みされたファイルは `./embedding_csv/` に保存される  
 **url** に値を入れると `[url]` という項目も追加される
 
