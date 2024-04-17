@@ -60,6 +60,17 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
 def main(req: func.HttpRequest) -> func.HttpResponse:
     logging.info('Python HTTP trigger function "CogSearch" processed a request.')
 
+    index_name = req.params.get("index_name")
+    if not index_name:
+        try:
+            req_body = req.get_json()
+        except ValueError:
+            pass
+        else:
+            index_name = req_body.get("index_name")
+    if index_name == None:
+        index_name = myopenAI.AZURE_SEARCH_INDEX
+
     q = req.params.get("question")
     if not q:
         try:
@@ -108,7 +119,7 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
     # Only keep the text query if the retrieval mode uses text, otherwise drop it
     search_client = SearchClient(
         endpoint=f"https://{myopenAI.AZURE_SEARCH_SERVICE}.search.windows.net",
-        index_name=myopenAI.AZURE_SEARCH_INDEX,
+        index_name=index_name,
         credential=DefaultAzureCredential(exclude_shared_token_cache_credential=True),
     )
 

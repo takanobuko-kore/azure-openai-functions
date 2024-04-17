@@ -150,6 +150,7 @@ FAQ ファイルの **target** 列に対して、8192トークン以下であれ
 
 | *ボディ* ||||
 |-|-|-|-|
+| index_name | オプション | String | 対象のインデックス名<br>(デフォルト: 環境変数<AZURE_SEARCH_INDEX>) |
 | question | 必須 | String | 質問クエリ |
 | top | オプション | String | 取得する検索結果の数<br>(デフォルト: 3) |
 | model | 必須 | String | GPT モデルデプロイ名 |
