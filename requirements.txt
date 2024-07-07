@@ -5,6 +5,7 @@
 azure-functions
 openai
 pandas
+numba
 tiktoken
 
 # CogSearch

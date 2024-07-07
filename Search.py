@@ -5,9 +5,27 @@ import azure.functions as func
 import numpy as np
 import pandas as pd
 from azure.identity import DefaultAzureCredential, get_bearer_token_provider
+from numba import jit
 from openai import AzureOpenAI
 
 import libs.loadOpenAI as myopenAI
+
+
+@jit(nopython=True)
+def cosine_similarity_numba(u: np.ndarray, v: np.ndarray):
+    assert u.shape[0] == v.shape[0]
+    uv = 0
+    uu = 0
+    vv = 0
+    for i in range(u.shape[0]):
+        uv += u[i] * v[i]
+        uu += u[i] * u[i]
+        vv += v[i] * v[i]
+    cos_theta = 1
+    if uu != 0 and vv != 0:
+        cos_theta = uv / np.sqrt(uu * vv)
+    return cos_theta
+
 
 Search = func.Blueprint()
 
@@ -76,7 +94,7 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
         )
     )
 
-    embedding = (
+    embedding = np.array(
         client.embeddings.create(
             input=question, model=myopenAI.AZURE_OPENAI_EMB_DEPLOYMENT
         )
@@ -110,8 +128,7 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
         df = pd.concat(list_)
 
     df["similarities"] = df.embedding.apply(
-        lambda x: np.dot(eval(x), embedding)
-        / (np.linalg.norm(eval(x)) * np.linalg.norm(embedding))
+        lambda x: cosine_similarity_numba(np.array(eval(x)), embedding)
     )
     res = (
         df[df["similarities"] >= threshold]
