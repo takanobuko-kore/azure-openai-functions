@@ -111,6 +111,18 @@ FAQ ファイルの **target** 列に対して、8192トークン以下であれ
 
 ---
 
+### Ping
+
+| リクエスト ||
+|-|-|
+| *メソッド* | GET |
+| *エンドポイント* | https://{{ENDPOINT}}/api/Ping |
+
+URLへのPingを実施  
+Azure Functionsのコールドスタート対策  
+
+---
+
 ### 検索 (Search)
 
 | リクエスト ||
